@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# builds
+.next/
+out/
+dist/
+build/
+
+# turbo
+.turbo/
+
+# env
+.env
+.env*.local
+
+# misc
+*.log
+npm-debug.log*
+.DS_Store
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# local, per-user Claude Code settings (keep launch.json shared, ignore local overrides)
+.claude/settings.local.json
