@@ -1,5 +1,5 @@
-// Seeds the database with a set of real-world Sri Lankan restaurants
-// (local cuisine, seafood, fine dining, and fast-food chains).
+// Seeds the database with real-world Sri Lankan restaurants and a
+// cuisine-appropriate menu for each one.
 //
 // Run with:  pnpm --filter @pricy/db db:seed
 //
@@ -7,7 +7,7 @@
 // ./client reads it. (ESM runs imported modules top-to-bottom.)
 import "dotenv/config";
 
-import { db, restaurants } from "./index";
+import { db, restaurants, menuItems } from "./index";
 
 // price_range: 1 = $, 2 = $$, 3 = $$$, 4 = $$$$
 const sriLankanRestaurants = [
@@ -36,30 +36,109 @@ const sriLankanRestaurants = [
   { name: "Dinemore Kandy", cuisineType: "Fast Food", address: "Peradeniya Rd, Kandy", lat: 7.29, lng: 80.63, priceRange: 1 },
 ];
 
+// Menu items per cuisine. `price` is a whole number of Sri Lankan rupees (LKR
+// has no practical sub-unit). It's still an integer, so no float rounding bugs.
+type MenuItem = { name: string; price: number; description?: string };
+const menuByCuisine: Record<string, MenuItem[]> = {
+  "Sri Lankan": [
+    { name: "Chicken Kottu", price: 950, description: "Chopped godhamba roti stir-fried with chicken and vegetables" },
+    { name: "Rice & Curry (Chicken)", price: 750 },
+    { name: "Fish Ambul Thiyal", price: 1100, description: "Sour fish curry with goraka" },
+    { name: "String Hoppers with Dhal", price: 400 },
+    { name: "Watalappan", price: 450, description: "Jaggery and coconut custard" },
+  ],
+  Seafood: [
+    { name: "Garlic Butter Crab", price: 6500 },
+    { name: "Grilled Tiger Prawns", price: 3200 },
+    { name: "Cuttlefish Curry", price: 1800 },
+    { name: "Seafood Fried Rice", price: 1400 },
+  ],
+  Japanese: [
+    { name: "Salmon Sushi (6 pcs)", price: 2200 },
+    { name: "Chicken Ramen", price: 1900 },
+    { name: "Tempura Platter", price: 2400 },
+    { name: "Miso Soup", price: 600 },
+  ],
+  Chinese: [
+    { name: "Chicken Fried Rice", price: 850 },
+    { name: "Devilled Chicken", price: 1100 },
+    { name: "Hot Butter Cuttlefish", price: 1500 },
+    { name: "Chop Suey", price: 1200 },
+  ],
+  International: [
+    { name: "Beef Burger", price: 1600 },
+    { name: "Caesar Salad", price: 1200 },
+    { name: "Grilled Chicken Steak", price: 1800 },
+    { name: "New York Cheesecake", price: 900 },
+  ],
+  Cafe: [
+    { name: "Cappuccino", price: 550 },
+    { name: "Club Sandwich", price: 950 },
+    { name: "Chocolate Brownie", price: 650 },
+    { name: "Iced Coffee", price: 600 },
+  ],
+  "South Indian": [
+    { name: "Masala Dosa", price: 450 },
+    { name: "Idli (4 pcs)", price: 350 },
+    { name: "Medu Vada", price: 250 },
+    { name: "Filter Coffee", price: 250 },
+  ],
+  Bakery: [
+    { name: "Fish Bun", price: 120 },
+    { name: "Chicken Roll", price: 150 },
+    { name: "Egg Hopper", price: 100 },
+    { name: "Vegetable Patty", price: 130 },
+  ],
+  "Fast Food": [
+    { name: "Fried Chicken (3 pcs)", price: 1200 },
+    { name: "Cheeseburger", price: 850 },
+    { name: "French Fries (Large)", price: 450 },
+    { name: "Chicken Pizza (Regular)", price: 1800 },
+    { name: "Soft Drink", price: 350 },
+  ],
+};
+
 async function main() {
-  // Start clean so this script is safe to re-run.
+  // Delete children first (menu_items → restaurants FK), then parents. The
+  // cascade would handle it, but being explicit is clearer.
+  await db.delete(menuItems);
   await db.delete(restaurants);
 
-  // Insert all rows in one statement. We never pass id/createdAt — the
-  // database generates those.
-  const inserted = await db
+  // Insert restaurants and get back their DB-generated ids.
+  const insertedRestaurants = await db
     .insert(restaurants)
     .values(sriLankanRestaurants)
     .returning();
 
-  console.log(`Inserted ${inserted.length} restaurants.\n`);
+  // For each restaurant, build its menu rows referencing that restaurant's id.
+  const menuRows = insertedRestaurants.flatMap((r) => {
+    const items = menuByCuisine[r.cuisineType] ?? [];
+    return items.map((item) => ({
+      restaurantId: r.id,
+      name: item.name,
+      price: item.price, // whole rupees (LKR)
+      description: item.description ?? null,
+      // currency defaults to "LKR"
+    }));
+  });
 
-  // Read back a quick breakdown by cuisine so we can eyeball the mix.
-  const all = await db.select().from(restaurants);
-  const byCuisine = new Map<string, number>();
-  for (const r of all) {
-    byCuisine.set(r.cuisineType, (byCuisine.get(r.cuisineType) ?? 0) + 1);
-  }
+  const insertedMenu =
+    menuRows.length > 0
+      ? await db.insert(menuItems).values(menuRows).returning()
+      : [];
 
-  console.log(`Total in DB: ${all.length}`);
-  console.log("By cuisine:");
-  for (const [cuisine, count] of [...byCuisine].sort()) {
-    console.log(`  ${cuisine.padEnd(14)} ${count}`);
+  console.log(
+    `Inserted ${insertedRestaurants.length} restaurants and ${insertedMenu.length} menu items.\n`,
+  );
+
+  // Show one restaurant's menu as a sanity check, formatting cents → rupees.
+  const sample = insertedRestaurants[0];
+  if (sample) {
+    const items = insertedMenu.filter((m) => m.restaurantId === sample.id);
+    console.log(`Sample — ${sample.name} (${items.length} items):`);
+    for (const it of items) {
+      console.log(`  • ${it.name.padEnd(26)} ${it.currency} ${it.price}`);
+    }
   }
 
   // The postgres-js connection stays open, so exit explicitly.

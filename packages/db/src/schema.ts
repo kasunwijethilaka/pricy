@@ -10,6 +10,7 @@ import {
   doublePrecision,
   smallint,
   timestamp,
+  integer,
 } from "drizzle-orm/pg-core";
 export const restaurants = pgTable("restaurants", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -20,6 +21,23 @@ export const restaurants = pgTable("restaurants", {
   lng: doublePrecision("lng"),
   priceRange: smallint("price_range"),
   coverImageUrl: text("cover_image_url"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const menuItems = pgTable("menu_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  restaurantId: uuid("restaurant_id")
+    .notNull()
+    .references(() => restaurants.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  price: integer("price").notNull(),
+  currency: text("currency").notNull().default("LKR"),
+
+  description: text("description"),
+  imageUrl: text("image_url"),
+
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
