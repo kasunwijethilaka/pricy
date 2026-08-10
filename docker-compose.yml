@@ -1,0 +1,35 @@
+# Local development services for Pricy.
+# Start with:  docker compose up -d
+# Stop with:   docker compose down   (add -v to also wipe the data volume)
+#
+# This runs Postgres on your machine so you don't need a cloud account for
+# local dev. Production uses Neon (serverless Postgres) — same driver, same
+# SQL, just a different connection string.
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: pricy-postgres
+    restart: unless-stopped
+    environment:
+      # Local-only credentials — fine to commit since this DB never leaves
+      # your laptop. Never do this for a real/hosted database.
+      POSTGRES_USER: pricy
+      POSTGRES_PASSWORD: pricy
+      POSTGRES_DB: pricy
+    ports:
+      # host:container — lets your app reach the DB at localhost:5432
+      - "5432:5432"
+    volumes:
+      # named volume so your data survives `docker compose down` / restarts
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # marks the container "healthy" only once Postgres is actually accepting
+      # connections — useful so tools can wait for it
+      test: ["CMD-SHELL", "pg_isready -U pricy -d pricy"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
