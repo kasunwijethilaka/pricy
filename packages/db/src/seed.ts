@@ -7,33 +7,173 @@
 // ./client reads it. (ESM runs imported modules top-to-bottom.)
 import "dotenv/config";
 
-import { db, restaurants, menuItems } from "./index";
+import { db, restaurants, menuItems, priceHistory } from "./index";
 
 // price_range: 1 = $, 2 = $$, 3 = $$$, 4 = $$$$
 const sriLankanRestaurants = [
   // — Local & fine dining —
-  { name: "Ministry of Crab", cuisineType: "Seafood", address: "Old Dutch Hospital, Colombo 01", lat: 6.9344, lng: 79.8428, priceRange: 4 },
-  { name: "Nihonbashi", cuisineType: "Japanese", address: "11 Galle Face Terrace, Colombo 03", lat: 6.918, lng: 79.848, priceRange: 4 },
-  { name: "Kaema Sutra", cuisineType: "Sri Lankan", address: "Shangri-La, Colombo 02", lat: 6.926, lng: 79.846, priceRange: 4 },
-  { name: "The Lagoon", cuisineType: "Seafood", address: "Cinnamon Grand, 77 Galle Rd, Colombo 03", lat: 6.917, lng: 79.848, priceRange: 4 },
-  { name: "Upali's by Nawaloka", cuisineType: "Sri Lankan", address: "65 C.W.W. Kannangara Mw, Colombo 07", lat: 6.911, lng: 79.865, priceRange: 3 },
-  { name: "Raja Bojun", cuisineType: "Sri Lankan", address: "Seylan Towers, Colombo 03", lat: 6.92, lng: 79.849, priceRange: 3 },
-  { name: "Cricket Club Cafe", cuisineType: "International", address: "34 Queen's Rd, Colombo 03", lat: 6.906, lng: 79.858, priceRange: 3 },
-  { name: "Chinese Dragon Cafe", cuisineType: "Chinese", address: "Nawala Rd, Nawala", lat: 6.879, lng: 79.889, priceRange: 2 },
-  { name: "Green Cabin", cuisineType: "Sri Lankan", address: "453 Galle Rd, Colombo 03", lat: 6.898, lng: 79.854, priceRange: 2 },
-  { name: "Lucky Fort Restaurant", cuisineType: "Sri Lankan", address: "Galle Fort, Galle", lat: 6.027, lng: 80.217, priceRange: 2 },
-  { name: "The Empire Cafe", cuisineType: "Cafe", address: "Church St, Galle Fort, Galle", lat: 6.0264, lng: 80.2168, priceRange: 2 },
-  { name: "Malayan Cafe", cuisineType: "South Indian", address: "36 Grand Bazaar St, Jaffna", lat: 9.6615, lng: 80.0255, priceRange: 1 },
-  { name: "Pilawoos", cuisineType: "Sri Lankan", address: "417 Galle Rd, Colombo 03", lat: 6.901, lng: 79.853, priceRange: 1 },
-  { name: "Perera & Sons", cuisineType: "Bakery", address: "Havelock Rd, Colombo 05", lat: 6.885, lng: 79.872, priceRange: 1 },
+  {
+    name: "Ministry of Crab",
+    cuisineType: "Seafood",
+    address: "Old Dutch Hospital, Colombo 01",
+    lat: 6.9344,
+    lng: 79.8428,
+    priceRange: 4,
+  },
+  {
+    name: "Nihonbashi",
+    cuisineType: "Japanese",
+    address: "11 Galle Face Terrace, Colombo 03",
+    lat: 6.918,
+    lng: 79.848,
+    priceRange: 4,
+  },
+  {
+    name: "Kaema Sutra",
+    cuisineType: "Sri Lankan",
+    address: "Shangri-La, Colombo 02",
+    lat: 6.926,
+    lng: 79.846,
+    priceRange: 4,
+  },
+  {
+    name: "The Lagoon",
+    cuisineType: "Seafood",
+    address: "Cinnamon Grand, 77 Galle Rd, Colombo 03",
+    lat: 6.917,
+    lng: 79.848,
+    priceRange: 4,
+  },
+  {
+    name: "Upali's by Nawaloka",
+    cuisineType: "Sri Lankan",
+    address: "65 C.W.W. Kannangara Mw, Colombo 07",
+    lat: 6.911,
+    lng: 79.865,
+    priceRange: 3,
+  },
+  {
+    name: "Raja Bojun",
+    cuisineType: "Sri Lankan",
+    address: "Seylan Towers, Colombo 03",
+    lat: 6.92,
+    lng: 79.849,
+    priceRange: 3,
+  },
+  {
+    name: "Cricket Club Cafe",
+    cuisineType: "International",
+    address: "34 Queen's Rd, Colombo 03",
+    lat: 6.906,
+    lng: 79.858,
+    priceRange: 3,
+  },
+  {
+    name: "Chinese Dragon Cafe",
+    cuisineType: "Chinese",
+    address: "Nawala Rd, Nawala",
+    lat: 6.879,
+    lng: 79.889,
+    priceRange: 2,
+  },
+  {
+    name: "Green Cabin",
+    cuisineType: "Sri Lankan",
+    address: "453 Galle Rd, Colombo 03",
+    lat: 6.898,
+    lng: 79.854,
+    priceRange: 2,
+  },
+  {
+    name: "Lucky Fort Restaurant",
+    cuisineType: "Sri Lankan",
+    address: "Galle Fort, Galle",
+    lat: 6.027,
+    lng: 80.217,
+    priceRange: 2,
+  },
+  {
+    name: "The Empire Cafe",
+    cuisineType: "Cafe",
+    address: "Church St, Galle Fort, Galle",
+    lat: 6.0264,
+    lng: 80.2168,
+    priceRange: 2,
+  },
+  {
+    name: "Malayan Cafe",
+    cuisineType: "South Indian",
+    address: "36 Grand Bazaar St, Jaffna",
+    lat: 9.6615,
+    lng: 80.0255,
+    priceRange: 1,
+  },
+  {
+    name: "Pilawoos",
+    cuisineType: "Sri Lankan",
+    address: "417 Galle Rd, Colombo 03",
+    lat: 6.901,
+    lng: 79.853,
+    priceRange: 1,
+  },
+  {
+    name: "Perera & Sons",
+    cuisineType: "Bakery",
+    address: "Havelock Rd, Colombo 05",
+    lat: 6.885,
+    lng: 79.872,
+    priceRange: 1,
+  },
 
   // — Fast food —
-  { name: "KFC Kollupitiya", cuisineType: "Fast Food", address: "141 Galle Rd, Colombo 03", lat: 6.908, lng: 79.852, priceRange: 2 },
-  { name: "McDonald's Union Place", cuisineType: "Fast Food", address: "55 Union Place, Colombo 02", lat: 6.921, lng: 79.857, priceRange: 2 },
-  { name: "Pizza Hut Dehiwala", cuisineType: "Fast Food", address: "Galle Rd, Dehiwala", lat: 6.856, lng: 79.865, priceRange: 2 },
-  { name: "Burger King Crescat", cuisineType: "Fast Food", address: "Crescat Boulevard, Colombo 03", lat: 6.915, lng: 79.848, priceRange: 2 },
-  { name: "Domino's Pizza Nugegoda", cuisineType: "Fast Food", address: "High Level Rd, Nugegoda", lat: 6.872, lng: 79.889, priceRange: 2 },
-  { name: "Dinemore Kandy", cuisineType: "Fast Food", address: "Peradeniya Rd, Kandy", lat: 7.29, lng: 80.63, priceRange: 1 },
+  {
+    name: "KFC Kollupitiya",
+    cuisineType: "Fast Food",
+    address: "141 Galle Rd, Colombo 03",
+    lat: 6.908,
+    lng: 79.852,
+    priceRange: 2,
+  },
+  {
+    name: "McDonald's Union Place",
+    cuisineType: "Fast Food",
+    address: "55 Union Place, Colombo 02",
+    lat: 6.921,
+    lng: 79.857,
+    priceRange: 2,
+  },
+  {
+    name: "Pizza Hut Dehiwala",
+    cuisineType: "Fast Food",
+    address: "Galle Rd, Dehiwala",
+    lat: 6.856,
+    lng: 79.865,
+    priceRange: 2,
+  },
+  {
+    name: "Burger King Crescat",
+    cuisineType: "Fast Food",
+    address: "Crescat Boulevard, Colombo 03",
+    lat: 6.915,
+    lng: 79.848,
+    priceRange: 2,
+  },
+  {
+    name: "Domino's Pizza Nugegoda",
+    cuisineType: "Fast Food",
+    address: "High Level Rd, Nugegoda",
+    lat: 6.872,
+    lng: 79.889,
+    priceRange: 2,
+  },
+  {
+    name: "Dinemore Kandy",
+    cuisineType: "Fast Food",
+    address: "Peradeniya Rd, Kandy",
+    lat: 7.29,
+    lng: 80.63,
+    priceRange: 1,
+  },
 ];
 
 // Menu items per cuisine. `price` is a whole number of Sri Lankan rupees (LKR
@@ -41,11 +181,24 @@ const sriLankanRestaurants = [
 type MenuItem = { name: string; price: number; description?: string };
 const menuByCuisine: Record<string, MenuItem[]> = {
   "Sri Lankan": [
-    { name: "Chicken Kottu", price: 950, description: "Chopped godhamba roti stir-fried with chicken and vegetables" },
+    {
+      name: "Chicken Kottu",
+      price: 950,
+      description:
+        "Chopped godhamba roti stir-fried with chicken and vegetables",
+    },
     { name: "Rice & Curry (Chicken)", price: 750 },
-    { name: "Fish Ambul Thiyal", price: 1100, description: "Sour fish curry with goraka" },
+    {
+      name: "Fish Ambul Thiyal",
+      price: 1100,
+      description: "Sour fish curry with goraka",
+    },
     { name: "String Hoppers with Dhal", price: 400 },
-    { name: "Watalappan", price: 450, description: "Jaggery and coconut custard" },
+    {
+      name: "Watalappan",
+      price: 450,
+      description: "Jaggery and coconut custard",
+    },
   ],
   Seafood: [
     { name: "Garlic Butter Crab", price: 6500 },
@@ -99,8 +252,9 @@ const menuByCuisine: Record<string, MenuItem[]> = {
 };
 
 async function main() {
-  // Delete children first (menu_items → restaurants FK), then parents. The
-  // cascade would handle it, but being explicit is clearer.
+  // Delete deepest children first (price_history → menu_items → restaurants).
+  // The cascades would handle it, but being explicit is clearer.
+  await db.delete(priceHistory);
   await db.delete(menuItems);
   await db.delete(restaurants);
 
@@ -127,17 +281,56 @@ async function main() {
       ? await db.insert(menuItems).values(menuRows).returning()
       : [];
 
-  console.log(
-    `Inserted ${insertedRestaurants.length} restaurants and ${insertedMenu.length} menu items.\n`,
+  // Build a price history for each menu item: a few snapshots trending up to
+  // today's price, simulating gradual increases over the past year. The most
+  // recent snapshot (monthsAgo 0) equals the item's current price.
+  const historySteps = [
+    { monthsAgo: 12, factor: 0.8 },
+    { monthsAgo: 8, factor: 0.87 },
+    { monthsAgo: 4, factor: 0.93 },
+    { monthsAgo: 0, factor: 1.0 },
+  ];
+  const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  const historyRows = insertedMenu.flatMap((item) =>
+    historySteps.map((step) => ({
+      menuItemId: item.id,
+      price: Math.round(item.price * step.factor),
+      recordedAt: new Date(now - step.monthsAgo * MONTH_MS),
+    })),
   );
 
-  // Show one restaurant's menu as a sanity check, formatting cents → rupees.
+  const insertedHistory =
+    historyRows.length > 0
+      ? await db.insert(priceHistory).values(historyRows).returning()
+      : [];
+
+  console.log(
+    `Inserted ${insertedRestaurants.length} restaurants, ` +
+      `${insertedMenu.length} menu items, and ` +
+      `${insertedHistory.length} price snapshots.\n`,
+  );
+
+  // Sanity check: one restaurant's menu, plus one item's price history.
   const sample = insertedRestaurants[0];
   if (sample) {
     const items = insertedMenu.filter((m) => m.restaurantId === sample.id);
     console.log(`Sample — ${sample.name} (${items.length} items):`);
     for (const it of items) {
       console.log(`  • ${it.name.padEnd(26)} ${it.currency} ${it.price}`);
+    }
+
+    const firstItem = items[0];
+    if (firstItem) {
+      const history = insertedHistory
+        .filter((h) => h.menuItemId === firstItem.id)
+        .sort((a, b) => a.recordedAt.getTime() - b.recordedAt.getTime());
+      console.log(`\nPrice history — ${firstItem.name}:`);
+      for (const h of history) {
+        const date = h.recordedAt.toISOString().slice(0, 10);
+        console.log(`  ${date}   ${firstItem.currency} ${h.price}`);
+      }
     }
   }
 

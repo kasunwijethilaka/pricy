@@ -42,3 +42,14 @@ export const menuItems = pgTable("menu_items", {
     .notNull()
     .defaultNow(),
 });
+
+export const priceHistory = pgTable("price_history", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  menuItemId: uuid("menu_item_id")
+    .notNull()
+    .references(() => menuItems.id, { onDelete: "cascade" }),
+  price: integer("price").notNull(),
+  recordedAt: timestamp("recorded_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
