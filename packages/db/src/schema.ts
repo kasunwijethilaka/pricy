@@ -12,6 +12,8 @@ import {
   timestamp,
   integer,
   primaryKey,
+  pgEnum,
+  jsonb,
 } from "drizzle-orm/pg-core";
 export const restaurants = pgTable("restaurants", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -80,3 +82,24 @@ export const favorites = pgTable(
   },
   (table) => [primaryKey({ columns: [table.userId, table.restaurantId] })],
 );
+
+export const submissionStatus = pgEnum("submission_status", [
+  "pending",
+  "approved",
+  "rejected",
+]);
+
+export const menuSubmissions = pgTable("menu_submissions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  restaurantId: uuid("restaurant_id").references(() => restaurants.id, {
+    onDelete: "cascade",
+  }),
+  status: submissionStatus("status").notNull().default("pending"),
+  payload: jsonb("payload").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
