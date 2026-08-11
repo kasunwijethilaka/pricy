@@ -11,6 +11,7 @@ import {
   smallint,
   timestamp,
   integer,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 export const restaurants = pgTable("restaurants", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -63,3 +64,19 @@ export const users = pgTable("users", {
     .notNull()
     .defaultNow(),
 });
+
+export const favorites = pgTable(
+  "favorites",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    restaurantId: uuid("restaurant_id")
+      .notNull()
+      .references(() => restaurants.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.restaurantId] })],
+);
