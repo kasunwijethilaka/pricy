@@ -15,8 +15,20 @@ import {
   pgEnum,
   jsonb,
 } from "drizzle-orm/pg-core";
+
+export const userRole = pgEnum("user_role", ["user", "owner", "admin"]);
+
+export const submissionStatus = pgEnum("submission_status", [
+  "pending",
+  "approved",
+  "rejected",
+]);
+
 export const restaurants = pgTable("restaurants", {
   id: uuid("id").primaryKey().defaultRandom(),
+  ownerId: uuid("owner_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
   name: text("name").notNull(),
   cuisineType: text("cuisine_type").notNull(),
   address: text("address"),
@@ -62,6 +74,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   name: text("name"),
   imageUrl: text("image_url"),
+  role: userRole("role").notNull().default("user"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -82,12 +95,6 @@ export const favorites = pgTable(
   },
   (table) => [primaryKey({ columns: [table.userId, table.restaurantId] })],
 );
-
-export const submissionStatus = pgEnum("submission_status", [
-  "pending",
-  "approved",
-  "rejected",
-]);
 
 export const menuSubmissions = pgTable("menu_submissions", {
   id: uuid("id").primaryKey().defaultRandom(),

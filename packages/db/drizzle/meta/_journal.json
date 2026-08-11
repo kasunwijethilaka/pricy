@@ -50,6 +50,13 @@
       "when": 1786447801627,
       "tag": "0006_icy_major_mapleleaf",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786448256079,
+      "tag": "0007_futuristic_captain_stacy",
+      "breakpoints": true
     }
   ]
 }
