@@ -1,0 +1,22 @@
+{
+  "name": "@pricy/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@pricy/db": "workspace:*",
+    "@trpc/server": "^11.18.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@pricy/config": "workspace:*",
+    "@types/node": "^20.17.12",
+    "tsx": "^4.23.11"
+  }
+}

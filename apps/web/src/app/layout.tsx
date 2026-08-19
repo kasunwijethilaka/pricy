@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+import { TRPCProvider } from "@/trpc/react";
+
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
@@ -17,7 +19,9 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       {/* suppressHydrationWarning: silences harmless <body> attribute
           mismatches injected by browser extensions (e.g. Grammarly). */}
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <TRPCProvider>{children}</TRPCProvider>
+      </body>
     </html>
   );
 }
