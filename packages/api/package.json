@@ -7,7 +7,9 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@pricy/db": "workspace:*",
@@ -17,6 +19,8 @@
   "devDependencies": {
     "@pricy/config": "workspace:*",
     "@types/node": "^20.17.12",
-    "tsx": "^4.23.11"
+    "dotenv": "^17.4.2",
+    "tsx": "^4.23.11",
+    "vitest": "^4.1.11"
   }
 }

@@ -3,6 +3,7 @@
 // Only tRPC procedures (packages/api) read from this package; client-facing
 // components never import it. Every column defined here becomes type-safe in
 // your queries.
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   uuid,
@@ -57,6 +58,17 @@ export const menuItems = pgTable("menu_items", {
     .notNull()
     .defaultNow(),
 });
+
+export const restaurantRelations = relations(restaurants, ({ many }) => ({
+  menuItems: many(menuItems),
+}));
+
+export const menuItemsRelations = relations(menuItems, ({ one }) => ({
+  restaurant: one(restaurants, {
+    fields: [menuItems.restaurantId],
+    references: [restaurants.id],
+  }),
+}));
 
 export const priceHistory = pgTable("price_history", {
   id: uuid("id").primaryKey().defaultRandom(),
