@@ -13,19 +13,17 @@ function priceLabel(range: number | null): string {
 }
 
 export function RestaurantGrid({ restaurants }: { restaurants: Restaurant[] }) {
-  return (
-    <div className="mx-auto max-w-6xl px-6 py-12">
-      <header className="mb-8">
-        <h1 className="text-3xl font-extrabold tracking-tight text-ink">
-          Restaurants
-        </h1>
-        <p className="mt-1 text-muted">
-          {restaurants.length} places to explore
-        </p>
-      </header>
+  if (restaurants.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-slate-300 py-16 text-center">
+        <p className="text-muted">No restaurants match your filters.</p>
+      </div>
+    );
+  }
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {restaurants.map((r) => (
+  return (
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {restaurants.map((r) => (
           <Link
             key={r.id}
             href={`/restaurants/${r.id}`}
@@ -58,7 +56,6 @@ export function RestaurantGrid({ restaurants }: { restaurants: Restaurant[] }) {
             </article>
           </Link>
         ))}
-      </div>
     </div>
   );
 }
